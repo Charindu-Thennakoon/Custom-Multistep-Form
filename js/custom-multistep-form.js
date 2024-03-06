@@ -40,107 +40,103 @@ jQuery(document).ready(function ($) {
     showTab(currentTab);
   }
 
-  // $("#prevBtn").click(function () {
-  //   nextPrev(-1);
-  // });
-  // $("#nextBtn").click(function () {
-  //   nextPrev(1);
-  // });
+  function validateForm() {
+    // This function deals with validation of the form fields
+    var valid = true;
+    var x = $(".tab")[currentTab];
+    var inputFields = $(x).find("input");
+    //name feilds validation
+    inputFields.each(function () {
+      var input = $(this);
+      if (
+        input.attr("name") === "first_name" ||
+        input.attr("name") === "last_name"
+      ) {
+        if (input.val().trim() === "") {
+          input.addClass("invalid");
+          valid = false;
+        } else {
+          input.removeClass("invalid");
+        }
+      }
 
-  // function validateForm() {
-  //   // This function deals with validation of the form fields
-  //   var x,
-  //     y,
-  //     i,
-  //     valid = true;
-  //   x = $(".tab");
-  //   y = $(x[currentTab]).find("input");
-  //   // A loop that checks every input field in the current tab:
-  //   for (i = 0; i < y.length; i++) {
-  //     // If a field is empty...
-  //     if ($(y[i]).val() == "") {
-  //       // add an "invalid" class to the field:
-  //       $(y[i]).addClass("invalid");
-  //       // and set the current valid status to false
-  //       valid = false;
-  //     }
-  //   }
-  //   return valid; // return the valid status
-  // }
+      // Validate Email field
+      if (input.attr("name") === "email") {
+        var emailRegex =
+          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (!emailRegex.test(input.val())) {
+          input.addClass("invalid");
+          valid = false;
+        } else {
+          input.removeClass("invalid");
+        }
+      }
+      // Validate Phone field
+      if (input.attr("name") === "phone") {
+        if (input.val().trim() === "") {
+          input.addClass("invalid");
+          valid = false;
+        } else {
+          input.removeClass("invalid");
+        }
+      }
+      // Validate Profile Image
+      if (
+        input.attr("type") === "file" &&
+        input.attr("name") === "profile_image"
+      ) {
+        if (input[0].files.length > 0) {
+          var file = input[0].files[0];
+          var fileType = file.type;
+          var validImageTypes = [
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+          ];
+          if (!validImageTypes.includes(fileType)) {
+            input.addClass("invalid");
+            valid = false;
+          } else {
+            input.removeClass("invalid");
+          }
+        } else {
+          // If no file is selected, mark as invalid
+          input.addClass("invalid");
+          valid = false;
+        }
+      }
+      // Validate NIC (PDF) field
+      if (input.attr("name") === "nic_pdf") {
+        if (input[0].files.length > 0) {
+          var file = input[0].files[0];
+          var fileName = file.name;
+          var fileExtension = fileName.split(".").pop().toLowerCase();
+
+          if (fileExtension !== "pdf") {
+            // If the file extension is not PDF, mark the input as invalid
+            input.addClass("invalid");
+            valid = false;
+          } else {
+            // If the file is a PDF, remove any invalid class
+            input.removeClass("invalid");
+          }
+        } else {
+          // If no file is selected, mark as invalid
+          input.addClass("invalid");
+          valid = false;
+        }
+      }
+    });
+
+    return valid; // Return the valid status
+  }
 
   function fixStepIndicator(n) {
     // This function removes the "active" class of all steps...
     $(".step").removeClass("active");
-    //... and adds the "active" class on the current step:
+    //... and adds the "active" class to the current step:
     $($(".step")[n]).addClass("active");
-  }
-  function validateForm() {
-    // This function deals with validation of the form fields
-    var x,
-      y,
-      i,
-      valid = true;
-    x = $(".tab");
-    y = $(x[currentTab]).find("input");
-    // A loop that checks every input field in the current tab:
-    for (i = 0; i < y.length; i++) {
-      // If a field is empty...
-      if ($(y[i]).val() == "") {
-        // add an "invalid" class to the field:
-        $(y[i]).addClass("invalid");
-        // and set the current valid status to false
-        valid = false;
-      } else {
-        $(y[i]).removeClass("invalid"); // Remove invalid class if field is not empty
-      }
-    }
-
-    // Specific validation for the email field
-    var email = $("input[name='email']").val();
-    if (email) {
-      var emailRegex =
-        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if (!emailRegex.test(email)) {
-        $("input[name='email']").addClass("invalid");
-        valid = false;
-      } else {
-        $("input[name='email']").removeClass("invalid");
-      }
-    }
-    // Profile image validation
-    var profileImage = $("input[name='profile_image']")[0];
-    if (profileImage && profileImage.files.length > 0) {
-      var fileName = profileImage.files[0].name;
-      var fileExtension = fileName.split(".").pop().toLowerCase();
-      var allowedExtensions = ["jpeg", "jpg", "png", "webp"];
-
-      if (!allowedExtensions.includes(fileExtension)) {
-        // If the file extension is not in the allowed list, mark the input as invalid
-        $(profileImage).addClass("invalid");
-        valid = false;
-      } else {
-        // If the file is valid, ensure any invalid class is removed
-        $(profileImage).removeClass("invalid");
-      }
-    }
-    // NIC validation for .pdf format
-    var nicFile = $("input[name='nic_pdf']")[0];
-    if (nicFile && nicFile.files.length > 0) {
-      var fileName = nicFile.files[0].name;
-      var fileExtension = fileName.split(".").pop().toLowerCase();
-      var allowedExtension = "pdf";
-
-      if (fileExtension !== allowedExtension) {
-        // If the file extension is not 'pdf', mark the input as invalid
-        $(nicFile).addClass("invalid");
-        valid = false;
-      } else {
-        // If the file is valid, ensure any invalid class is removed
-        $(nicFile).removeClass("invalid");
-      }
-    }
-
-    return valid; // return the valid status
   }
 
   function submitForm() {
@@ -156,6 +152,7 @@ jQuery(document).ready(function ($) {
       contentType: false,
       processData: false,
       success: function (response) {
+        // Assuming response.success is a boolean indicating submission status
         if (response.success) {
           alert("Form submitted successfully.");
 
@@ -167,10 +164,14 @@ jQuery(document).ready(function ($) {
           $(".step").removeClass("finish").removeClass("active"); // Reset step indicators
           $(".step:first").addClass("active"); // Activate the first step indicator
         } else {
+          // Handle submission errors or invalid data
+          // Assuming response.data.message contains the error message
           alert("Error: " + response.data.message);
         }
       },
-      error: function () {
+      error: function (jqXHR, textStatus, errorThrown) {
+        // Handle AJAX errors
+        console.error("AJAX Error: ", textStatus, errorThrown);
         alert("There was an error processing your form. Please try again.");
       },
     });
